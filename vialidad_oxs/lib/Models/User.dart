@@ -1,7 +1,7 @@
 class User {
   final String name;
   final int employeeNumber;
-  final String password;
+  final String token;
   final String campus;
   final int isDeactivated;
   final int isAdmin;
@@ -9,7 +9,7 @@ class User {
   User({
     required this.name,
     required this.employeeNumber,
-    required this.password,
+    required this.token,
     required this.campus,
     required this.isDeactivated,
     required this.isAdmin,
@@ -17,12 +17,12 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      name: json['name'],
+      name: json['userFullName'],
       employeeNumber: json['employeeNumber'],
-      password: json['password'],
-      campus: json['campus'],
-      isDeactivated: json['isDeactivated'],
-      isAdmin: json['isAdmin'],
+      token: json['token'],
+      campus: json['userCampus'],
+      isDeactivated: json['status'],
+      isAdmin: json['userRole'],
     );
   }
 
@@ -30,7 +30,7 @@ class User {
     return {
       'name': name,
       'employeeNumber': employeeNumber,
-      'password': password,
+      'password': token,
       'campus': campus,
       'isDeactivated': isDeactivated,
       'isAdmin': isAdmin,

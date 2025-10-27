@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  static const Color primaryBlue = Color.fromRGBO(23, 76, 147, 1);
+  static const Color primaryBlue = Color.fromRGBO(130, 180, 245, 1);
   static const Color accentRed = Color.fromRGBO(235, 48, 69, 1);
 
-  static ColorScheme _lightColorScheme = ColorScheme.fromSeed(
+  static final ColorScheme _lightColorScheme = ColorScheme.fromSeed(
     seedColor: primaryBlue,
     brightness: Brightness.light,
     primary: primaryBlue,
@@ -14,7 +14,7 @@ class AppTheme {
     error: accentRed,
   );
 
-  static ColorScheme _darkColorScheme = ColorScheme.fromSeed(
+  static final ColorScheme _darkColorScheme = ColorScheme.fromSeed(
     seedColor: primaryBlue,
     brightness: Brightness.dark,
     primary: primaryBlue,

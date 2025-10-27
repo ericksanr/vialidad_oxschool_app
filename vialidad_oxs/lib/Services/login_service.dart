@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:vialidad_oxs/Controller/login_controller.dart';
 import '../Models/User.dart';
 import '../config/app_config.dart';
 import 'api_service.dart';
@@ -13,13 +14,8 @@ class LoginService {
 
   Future<User?> login(int employeeNumber, String password) async {
     try {
-      if (AppConfig.isDemoMode) {
-        // Demo mode - use mock authentication
-        return await _mockLogin(employeeNumber, password);
-      } else {
-        // Production mode - use real API
-        return await _authenticateWithAPI(employeeNumber, password);
-      }
+      // Production mode - use real API
+      return await _authenticateWithAPI(employeeNumber, password);
     } on ApiException catch (e) {
       throw Exception(e.message);
     } on DioException catch (e) {
@@ -29,26 +25,6 @@ class LoginService {
     }
   }
 
-  // Demo authentication method
-  Future<User?> _mockLogin(int employeeNumber, String password) async {
-    // Simulate network delay
-    await Future.delayed(
-      Duration(milliseconds: AppConfig.loginAnimationDuration),
-    );
-
-    if (_mockAuthenticate(employeeNumber, password)) {
-      return User(
-        name: 'Usuario Demo',
-        employeeNumber: employeeNumber,
-        password: '', // Don't store password in response
-        campus: 'Campus Principal',
-        isDeactivated: 0,
-        isAdmin: 0,
-      );
-    }
-    return null;
-  }
-
   // Real API authentication method using Dio
   Future<User?> _authenticateWithAPI(
     int employeeNumber,
@@ -56,41 +32,25 @@ class LoginService {
   ) async {
     try {
       final response = await _apiService.dio.post(
-        AppConfig.loginEndpoint,
+        '${ApiConfig.productionBaseUrl}/auth/drop-off/login',
         data: {'employeeNumber': employeeNumber, 'password': password},
+        options: Options(
+          sendTimeout: const Duration(seconds: 12),
+          receiveTimeout: const Duration(seconds: 12),
+        ),
       );
-
       if (response.statusCode == 200) {
         final data = response.data;
 
-        // Handle different response structures
-        if (data['success'] == true && data['user'] != null) {
-          // Store authentication token if provided
-          if (data['token'] != null) {
-            _apiService.setAuthorizationHeader(data['token']);
-            // You might want to store this token in secure storage
-            // await _storeAuthToken(data['token']);
-          }
-
-          return User.fromJson(data['user']);
-        } else {
-          return null; // Invalid credentials
-        }
+        return User.fromJson(data);
       } else {
-        return null;
+        throw ApiException(
+          response.data['message'] ?? 'Error de autenticación',
+        );
       }
     } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
-        return null; // Invalid credentials
-      }
-      rethrow; // Let the calling method handle other errors
+      return null; // This line will never be reached
     }
-  }
-
-  // Mock authentication method for development/demo
-  bool _mockAuthenticate(int employeeNumber, String password) {
-    return password == AppConfig.demoPassword &&
-        employeeNumber >= AppConfig.minEmployeeNumber;
   }
 
   // Method to logout and clear authentication

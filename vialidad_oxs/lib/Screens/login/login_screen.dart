@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../Controller/login_controller.dart';
+import 'package:vialidad_oxs/Screens/home/home_screen.dart';
+import '../../Controller/login_controller.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -335,7 +336,13 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       );
 
-      // TODO: Navigate to main app screen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomeScreen(user: _loginController.currentUser!),
+        ),
+      );
+
       // Navigator.pushReplacementNamed(context, '/home');
     }
   }

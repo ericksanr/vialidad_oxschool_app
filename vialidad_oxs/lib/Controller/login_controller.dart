@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vialidad_oxs/config/temp/temp_data.dart';
 import '../Models/User.dart';
 import '../Services/login_service.dart';
 
@@ -75,6 +76,7 @@ class LoginController extends ChangeNotifier {
 
       if (user != null) {
         _currentUser = user;
+        tempUser = user;
         _isLoading = false;
         notifyListeners();
         return true;

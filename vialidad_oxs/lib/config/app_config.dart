@@ -3,6 +3,11 @@ class AppConfig {
   static const bool isDemoMode = true; // Set to false for production API calls
   static const bool isDebugMode = true; // Set to false in production builds
 
+  // API Configuration
+  static const String baseUrl =
+      'https://api.vialidadoxschool.com'; // Configure for your backend
+  static const Duration requestTimeout = Duration(seconds: 30);
+
   // Demo credentials for testing
   static const String demoPassword = "1234";
   static const int minEmployeeNumber = 1;
