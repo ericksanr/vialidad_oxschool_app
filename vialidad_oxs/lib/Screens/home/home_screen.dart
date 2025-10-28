@@ -1,8 +1,10 @@
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:vialidad_oxs/Controller/device_controller.dart';
+import 'package:vialidad_oxs/Screens/home/sections/visitors_section.dart';
 import 'package:vialidad_oxs/config/temp/temp_data.dart';
 import '../../Models/User.dart';
+import '../realtime_events_screen.dart';
 import 'sections/traffic_section.dart';
 import 'sections/reports_section.dart';
 import 'sections/settings_section.dart';
@@ -124,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case 1:
         return const TrafficSection();
       case 2:
-        return const ReportsSection();
+        return const VisitorsSection();
       case 3:
         return SettingsSection(user: widget.user, onLogout: _logout);
       default:
@@ -276,16 +278,24 @@ class _HomeScreenState extends State<HomeScreen> {
                 'Visitantes y accesos',
                 Icons.directions_car,
                 colorScheme.secondary,
-                () => _navigateToReports(),
+                () => _navigateToVisitors(),
               ),
-              // _buildFeatureCard(
-              //   context,
-              //   'Incidentes',
-              //   'Registrar incidentes',
-              //   Icons.warning,
-              //   const Color(0xFFFF9800),
-              //   () => _navigateToIncidents(),
-              // ),
+              _buildFeatureCard(
+                context,
+                'Eventos en Tiempo Real',
+                'Monitorear eventos',
+                Icons.radio_button_checked,
+                Colors.blue,
+                () => _navigateToRealtimeEvents(),
+              ),
+              _buildFeatureCard(
+                context,
+                'Eventos agendados',
+                'Consultar ciatas programadas',
+                Icons.calendar_month,
+                const Color(0xFFFF9800),
+                () => _navigateToCampus(),
+              ),
               // _buildFeatureCard(
               //   context,
               //   'Configuración',
@@ -302,14 +312,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   Icons.people,
                   const Color(0xFF9C27B0),
                   () => _navigateToUsers(),
-                ),
-                _buildFeatureCard(
-                  context,
-                  'Campus',
-                  'Gestionar campus',
-                  Icons.school,
-                  const Color(0xFF607D8B),
-                  () => _navigateToCampus(),
                 ),
               ],
             ]),
@@ -425,28 +427,78 @@ class _HomeScreenState extends State<HomeScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
+            // _buildActivityItem(
+            //   context,
+            //   'Control de tráfico actualizado',
+            //   'Hace 2 horas',
+            //   Icons.traffic,
+            //   colorScheme.primary,
+            // ),
+            // const Divider(height: 24),
             _buildActivityItem(
               context,
-              'Control de tráfico actualizado',
-              'Hace 2 horas',
-              Icons.traffic,
-              colorScheme.primary,
-            ),
-            const Divider(height: 24),
-            _buildActivityItem(
-              context,
-              'Nuevo reporte generado',
-              'Hace 4 horas',
+              'Generar reportes',
+              'Por periodo de tiempo',
               Icons.analytics,
               colorScheme.secondary,
             ),
             const Divider(height: 24),
-            _buildActivityItem(
-              context,
-              'Incidente resuelto',
-              'Ayer',
-              Icons.check_circle,
-              const Color(0xFF4CAF50),
+            // Realtime Events Button
+            InkWell(
+              onTap: _navigateToRealtimeEvents,
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: Colors.blue.withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(
+                        Icons.radio_button_checked,
+                        color: Colors.blue,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Ver Eventos en Tiempo Real',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.blue,
+                            ),
+                          ),
+                          Text(
+                            'Monitorear eventos en vivo',
+                            style: TextStyle(fontSize: 12, color: Colors.blue),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(
+                      Icons.arrow_forward_ios,
+                      color: Colors.blue,
+                      size: 16,
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
@@ -563,7 +615,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  void _navigateToReports() {
+  void _navigateToVisitors() {
     setState(() {
       _selectedIndex = 2;
     });
@@ -577,7 +629,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _navigateToCampus() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Gestión de campus próximamente')),
+      const SnackBar(content: Text('Gestión de agenda próximamente')),
+    );
+  }
+
+  void _navigateToRealtimeEvents() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => const RealtimeEventsScreen()),
     );
   }
 }

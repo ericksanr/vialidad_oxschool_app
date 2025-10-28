@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:vialidad_oxs/Controller/login_controller.dart';
 import 'package:vialidad_oxs/Services/api_service.dart';
 import '../config/app_config.dart';
 
@@ -23,7 +22,7 @@ class TrafficQRService {
   }) async {
     try {
       final response = await _dio.post(
-        '${ApiConfig.productionBaseUrl}/school-drop-off/create/',
+        '${ApiConfig.productionBaseUrl}/school-drop-off/student/create/',
         data: {'student': student, 'user': userId, 'device': device},
         options: Options(
           headers: {
@@ -32,19 +31,63 @@ class TrafficQRService {
           },
         ),
       );
-      if (response.statusCode != 200) {
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return {
+          'success': true,
+          'message': 'Entrada registrada exitosamente',
+          'data': response.data,
+        };
+      } else {
         throw Exception('Error registrando entrada');
       }
-
-      return {
-        'success': true,
-        'message': 'Entrada registrada exitosamente',
-        'data': response.data,
-      };
+    } on DioException catch (e) {
+      // Handle specific HTTP status codes
+      if (e.response?.statusCode == 409) {
+        return {
+          'success': false,
+          'message':
+              'Este registro ya existe. Es necesario actualizar el estado antes de poder escanearlo nuevamente.',
+          'error': 'RECORD_ALREADY_EXISTS',
+          'statusCode': 409,
+        };
+      } else if (e.response?.statusCode == 401) {
+        return {
+          'success': false,
+          'message':
+              'No tienes autorización para realizar esta acción. Verifica tu sesión.',
+          'error': 'UNAUTHORIZED',
+          'statusCode': 401,
+        };
+      } else if (e.response?.statusCode == 400) {
+        return {
+          'success': false,
+          'message':
+              'Los datos enviados no son válidos. Verifica el código QR.',
+          'error': 'BAD_REQUEST',
+          'statusCode': 400,
+        };
+      } else if (e.response?.statusCode == 500) {
+        return {
+          'success': false,
+          'message':
+              'Error interno del servidor. Intenta nuevamente en unos momentos.',
+          'error': 'INTERNAL_SERVER_ERROR',
+          'statusCode': 500,
+        };
+      } else {
+        return {
+          'success': false,
+          'message':
+              'Error de conexión: ${e.message ?? "Verifica tu conexión a internet"}',
+          'error': e.toString(),
+          'statusCode': e.response?.statusCode,
+        };
+      }
     } catch (e) {
       return {
         'success': false,
-        'message': 'Error registrando entrada: ${e.toString()}',
+        'message': 'Error inesperado registrando entrada: ${e.toString()}',
         'error': e.toString(),
       };
     }
@@ -52,31 +95,79 @@ class TrafficQRService {
 
   /// Register a vehicle exit using QR code
   Future<Map<String, dynamic>> registerExit({
-    required String qrCode,
-    required String campus,
+    required String studentId,
+    required String device,
     required int employeeNumber,
+    required String token,
   }) async {
     try {
       final response = await _dio.post(
-        '/traffic/exit',
-        data: {
-          'qr_code': qrCode,
-          'campus': campus,
-          'employee_number': employeeNumber,
-          'timestamp': DateTime.now().toIso8601String(),
-          'type': 'exit',
-        },
+        '${ApiConfig.productionBaseUrl}/school-drop-off/student/departed/',
+        data: {'student': studentId, 'device': device, 'user': employeeNumber},
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+        ),
       );
 
-      return {
-        'success': true,
-        'message': 'Salida registrada exitosamente',
-        'data': response.data,
-      };
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return {
+          'success': true,
+          'message': 'Salida registrada exitosamente',
+          'data': response.data,
+        };
+      } else {
+        throw Exception('Error registrando salida');
+      }
+    } on DioException catch (e) {
+      // Handle specific HTTP status codes
+      if (e.response?.statusCode == 409) {
+        return {
+          'success': false,
+          'message':
+              'Este registro ya existe. Es necesario actualizar el estado antes de poder escanearlo nuevamente.',
+          'error': 'RECORD_ALREADY_EXISTS',
+          'statusCode': 409,
+        };
+      } else if (e.response?.statusCode == 401) {
+        return {
+          'success': false,
+          'message':
+              'No tienes autorización para realizar esta acción. Verifica tu sesión.',
+          'error': 'UNAUTHORIZED',
+          'statusCode': 401,
+        };
+      } else if (e.response?.statusCode == 400) {
+        return {
+          'success': false,
+          'message':
+              'Los datos enviados no son válidos. Verifica el código QR.',
+          'error': 'BAD_REQUEST',
+          'statusCode': 400,
+        };
+      } else if (e.response?.statusCode == 500) {
+        return {
+          'success': false,
+          'message':
+              'Error interno del servidor. Intenta nuevamente en unos momentos.',
+          'error': 'INTERNAL_SERVER_ERROR',
+          'statusCode': 500,
+        };
+      } else {
+        return {
+          'success': false,
+          'message':
+              'Error de conexión: ${e.message ?? "Verifica tu conexión a internet"}',
+          'error': e.toString(),
+          'statusCode': e.response?.statusCode,
+        };
+      }
     } catch (e) {
       return {
         'success': false,
-        'message': 'Error registrando salida: ${e.toString()}',
+        'message': 'Error inesperado registrando salida: ${e.toString()}',
         'error': e.toString(),
       };
     }

@@ -14,6 +14,9 @@ class VisitorEvent {
   final int status;
   final int identificationNumber;
   final bool communityMember;
+  final int? updatedBy;
+  final DateTime? updateDate;
+  final String? updateDeviceName;
 
   const VisitorEvent({
     required this.creationDate,
@@ -29,6 +32,9 @@ class VisitorEvent {
     required this.status,
     required this.identificationNumber,
     required this.communityMember,
+    this.updatedBy,
+    this.updateDate,
+    this.updateDeviceName,
   });
 
   /// Create VisitorEvent from JSON response
@@ -49,6 +55,11 @@ class VisitorEvent {
       status: json['status'] as int,
       identificationNumber: json['identification_number'] as int,
       communityMember: json['communityMember'] as bool,
+      updatedBy: json['updatedBy'] as int?,
+      updateDate: json['updateDate'] != null
+          ? DateTime.parse(json['updateDate'] as String)
+          : null,
+      updateDeviceName: json['updateDeviceName'] as String?,
     );
   }
 
@@ -68,6 +79,9 @@ class VisitorEvent {
       'status': status,
       'identification_number': identificationNumber,
       'communityMember': communityMember,
+      'updatedBy': updatedBy,
+      'updateDate': updateDate?.toIso8601String(),
+      'updateDeviceName': updateDeviceName,
     };
   }
 
@@ -86,6 +100,9 @@ class VisitorEvent {
     int? status,
     int? identificationNumber,
     bool? communityMember,
+    int? updatedBy,
+    DateTime? updateDate,
+    String? updateDeviceName,
   }) {
     return VisitorEvent(
       creationDate: creationDate ?? this.creationDate,
@@ -101,6 +118,9 @@ class VisitorEvent {
       status: status ?? this.status,
       identificationNumber: identificationNumber ?? this.identificationNumber,
       communityMember: communityMember ?? this.communityMember,
+      updatedBy: updatedBy ?? this.updatedBy,
+      updateDate: updateDate ?? this.updateDate,
+      updateDeviceName: updateDeviceName ?? this.updateDeviceName,
     );
   }
 
@@ -120,13 +140,15 @@ class VisitorEvent {
   String get statusDescription {
     switch (status) {
       case 0:
-        return 'Pendiente';
-      case 1:
-        return 'Activo';
-      case 2:
-        return 'Completado';
-      case 3:
         return 'Cancelado';
+      case 1:
+        return 'Ingreso registrado';
+      case 2:
+        return 'Confirmado x destino.';
+      case 3:
+        return 'Agendado';
+      case 4:
+        return 'Salida registrada';
       default:
         return 'Desconocido';
     }
@@ -204,10 +226,12 @@ class VisitorEvent {
 
 /// Enum for visitor event status
 enum VisitorEventStatus {
-  pending(0, 'Pendiente'),
-  active(1, 'Activo'),
-  completed(2, 'Completado'),
-  cancelled(3, 'Cancelado');
+  canceled(0, 'Cancelado'),
+  arrived(1, 'Ingreso registrado'),
+  confirmed(2, 'Confirmado x destino.'),
+  scheduled(3, 'Agendado'),
+  departed(4, 'Salida registrada'),
+  otherwise(5, 'Otro');
 
   const VisitorEventStatus(this.code, this.description);
 
@@ -217,7 +241,7 @@ enum VisitorEventStatus {
   static VisitorEventStatus fromCode(int code) {
     return VisitorEventStatus.values.firstWhere(
       (status) => status.code == code,
-      orElse: () => VisitorEventStatus.pending,
+      orElse: () => VisitorEventStatus.otherwise,
     );
   }
 }
